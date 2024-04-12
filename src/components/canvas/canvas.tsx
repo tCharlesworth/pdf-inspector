@@ -1,40 +1,70 @@
 import { useContext, useEffect, useRef } from "react"
 import { AppContext } from "../../ctx/AppContext"
+import type { Line } from "pdf2json"
 import "./canvas.css"
 
-const WIDTH = 500, HEIGHT = 300
+type Vector = {
+  x: number,
+  y: number
+}
+type JSONLine = Line & {
+  l: number
+}
+
+const WIDTH = 1200, HEIGHT = 920
 
 export default function canvas() {
   const appContext = useContext(AppContext)
-  console.log('draw: ', appContext.fileData)
   
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const pageData = appContext.fileData?.pages[appContext.currentPage-1]
+  console.log('draw: ', appContext.currentPage, pageData)
 
   function draw() {
-    if(canvasRef.current && appContext.fileData) {
+    if(canvasRef.current && pageData) {
       const cvs = canvasRef.current
       const ctx = cvs.getContext("2d")
 
+
       if(ctx) {
-        const pdfWidth = appContext.fileData.meta
+        ctx.clearRect(0,0,WIDTH,HEIGHT)
         // Outline
         ctx.strokeStyle = "red"
         ctx.fillStyle = "white"
         ctx.fillRect(0,0,WIDTH-1,HEIGHT)
 
-        // 
+        // H Lines
+        pageData.HLines.forEach((l)=>{
+          const line = l as JSONLine
+          drawLine(ctx, calcVector(line.x, line.y), calcVector(line.x+line.l, line.y), line.w, "red")
+        })
+        // V Lines
+        pageData.VLines.forEach((l)=>{
+          const line = l as JSONLine
+          drawLine(ctx, calcVector(line.x,line.y), calcVector(line.x, line.y+line.l), line.w, "red")
+        })
       }
     }
 
-    function drawHLine() {
-
+    function calcVector(x: number, y: number):Vector {
+      if(pageData) {
+        return {
+          x: (x/pageData.Width) * WIDTH,
+          y: (y/pageData.Height) * HEIGHT
+        }
+      }
+      return { x, y }
     }
 
-    function drawLine(ctx:CanvasRenderingContext2D, x: number, y: number, length: number) {
+    function drawLine(ctx:CanvasRenderingContext2D, start: Vector, end: Vector, strokeWidth: number = 1, strokeColor: string = "black") {
+      ctx.strokeStyle = strokeColor
+      ctx.lineWidth = strokeWidth
+      ctx.stroke
       ctx.beginPath()
-      ctx.moveTo(x,y)
-      ctx.lineTo(x+length, y)
+      ctx.moveTo(start.x, start.y)
+      ctx.lineTo(end.x, end.y)
       ctx.closePath()
+      ctx.stroke()
     }
 
 
