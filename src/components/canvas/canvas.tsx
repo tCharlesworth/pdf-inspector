@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef } from "react"
 import { AppContext } from "../../ctx/AppContext"
 import type { Line } from "pdf2json"
 import "./canvas.css"
+import { PDFColorToHex } from "../../utils/pdfColors"
 
 type Vector = {
   x: number,
@@ -18,7 +19,7 @@ export default function canvas() {
   
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pageData = appContext.fileData?.pages[appContext.currentPage-1]
-  console.log('draw: ', appContext.currentPage, pageData)
+  console.log('draw: ', Date.now())
 
   function draw() {
     if(canvasRef.current && pageData) {
@@ -36,12 +37,12 @@ export default function canvas() {
         // H Lines
         pageData.HLines.forEach((l)=>{
           const line = l as JSONLine
-          drawLine(ctx, calcVector(line.x, line.y), calcVector(line.x+line.l, line.y), line.w, "red")
+          drawLine(ctx, calcVector(line.x, line.y), calcVector(line.x+line.l, line.y), line.w, line.oc || PDFColorToHex(line.clr || 0))
         })
         // V Lines
         pageData.VLines.forEach((l)=>{
           const line = l as JSONLine
-          drawLine(ctx, calcVector(line.x,line.y), calcVector(line.x, line.y+line.l), line.w, "red")
+          drawLine(ctx, calcVector(line.x,line.y), calcVector(line.x, line.y+line.l), line.w, line.oc || PDFColorToHex(line.clr || 0))
         })
       }
     }
