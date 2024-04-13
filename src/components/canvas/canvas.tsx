@@ -1,10 +1,10 @@
 import { useContext, useEffect, useRef } from "react"
 import { AppContext } from "../../ctx/AppContext"
+import { PDFColorToHex } from "../../utils/pdfColors"
 import type { Line } from "pdf2json"
 import "./canvas.css"
-import { PDFColorToHex } from "../../utils/pdfColors"
 
-type Vector = {
+type Point = {
   x: number,
   y: number
 }
@@ -37,17 +37,17 @@ export default function canvas() {
         // H Lines
         pageData.HLines.forEach((l)=>{
           const line = l as JSONLine
-          drawLine(ctx, calcVector(line.x, line.y), calcVector(line.x+line.l, line.y), line.w, line.oc || PDFColorToHex(line.clr || 0))
+          drawLine(ctx, calcPoint(line.x, line.y), calcPoint(line.x+line.l, line.y), line.w, line.oc || PDFColorToHex(line.clr || 0))
         })
         // V Lines
         pageData.VLines.forEach((l)=>{
           const line = l as JSONLine
-          drawLine(ctx, calcVector(line.x,line.y), calcVector(line.x, line.y+line.l), line.w, line.oc || PDFColorToHex(line.clr || 0))
+          drawLine(ctx, calcPoint(line.x,line.y), calcPoint(line.x, line.y+line.l), line.w, line.oc || PDFColorToHex(line.clr || 0))
         })
       }
     }
 
-    function calcVector(x: number, y: number):Vector {
+    function calcPoint(x: number, y: number):Point {
       if(pageData) {
         return {
           x: (x/pageData.Width) * WIDTH,
@@ -57,7 +57,7 @@ export default function canvas() {
       return { x, y }
     }
 
-    function drawLine(ctx:CanvasRenderingContext2D, start: Vector, end: Vector, strokeWidth: number = 1, strokeColor: string = "black") {
+    function drawLine(ctx:CanvasRenderingContext2D, start: Point, end: Point, strokeWidth: number = 1, strokeColor: string = "black") {
       ctx.strokeStyle = strokeColor
       ctx.lineWidth = strokeWidth
       ctx.stroke
