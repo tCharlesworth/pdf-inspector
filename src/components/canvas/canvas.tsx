@@ -18,10 +18,10 @@ export default function canvas() {
   const appContext = useContext(AppContext)
   
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const pageData = appContext.fileData?.pages[appContext.currentPage-1]
-  console.log('draw: ', Date.now())
 
   function draw() {
+    const pageData = appContext.fileData?.pages[appContext.currentPage-1]
+    console.log('draw: ', Date.now())
     if(canvasRef.current && pageData) {
       const cvs = canvasRef.current
       const ctx = cvs.getContext("2d")
@@ -73,7 +73,7 @@ export default function canvas() {
 
   useEffect(()=>{
     draw()
-  },[])
+  },[appContext.currentPage])
   
   return (
     <canvas width={WIDTH} height={HEIGHT} ref={canvasRef}></canvas>
